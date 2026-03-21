@@ -28,3 +28,8 @@
 git clone https://github.com/Gabrie50/EvoBrain.git
 cd EvoBrain
 pip install -r requirements.txt
+```
+
+## 🗂️ Estrutura Inicial do Projeto
+
+A estrutura base de diretórios e arquivos do EvoBrain foi criada para organizar backend, frontend, automações, testes e documentação do projeto.
