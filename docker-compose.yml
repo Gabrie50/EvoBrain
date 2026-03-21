@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    command: serve
+    restart: unless-stopped
+    networks:
+      - evobrain_network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: evobrain
+      POSTGRES_PASSWORD: evobrain123
+      POSTGRES_DB: evobrain
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - evobrain_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://evobrain:evobrain123@postgres:5432/evobrain
+      - LLM_HOST=http://ollama:11434
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama
+      - postgres
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+      - storage_data:/app/storage
+    restart: unless-stopped
+    networks:
+      - evobrain_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - evobrain_network
+
+volumes:
+  ollama_data:
+  postgres_data:
+  uploads_data:
+  storage_data:
+
+networks:
+  evobrain_network:
+    driver: bridge

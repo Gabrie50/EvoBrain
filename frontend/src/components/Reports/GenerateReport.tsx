@@ -1,0 +1,9 @@
+import React from 'react';
+import { Stats } from '../../services/api';
+
+interface GenerateReportProps { stats?: Stats; reportType: 'full' | 'summary' | 'detailed'; onReportTypeChange: (type: 'full' | 'summary' | 'detailed') => void; onGenerate: () => void; isLoading: boolean; }
+
+export default function GenerateReport({ stats, reportType, onReportTypeChange, onGenerate, isLoading }: GenerateReportProps) {
+  const simulation = stats?.simulation || {} as Stats['simulation'];
+  return <div className="card"><h3 className="text-lg font-semibold mb-4">Gerar Relatório</h3><div className="space-y-4"><div><label className="block text-sm font-medium mb-2">Tipo de Relatório</label><select value={reportType} onChange={(e) => onReportTypeChange(e.target.value as 'full' | 'summary' | 'detailed')} className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"><option value="full">Completo</option><option value="summary">Resumo Executivo</option><option value="detailed">Análise Detalhada</option></select></div><div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"><p className="text-sm text-gray-500 mb-2">Estatísticas atuais</p><div className="space-y-1 text-sm"><div className="flex justify-between"><span>Precisão:</span><span className="font-medium">{simulation.accuracy?.toFixed(1) || 0}%</span></div><div className="flex justify-between"><span>Previsões:</span><span className="font-medium">{simulation.predictions_made || 0}</span></div><div className="flex justify-between"><span>Agentes ativos:</span><span className="font-medium">{simulation.active_agents || 0}</span></div><div className="flex justify-between"><span>Geração:</span><span className="font-medium">{simulation.neuroevolution?.generation || 0}</span></div></div></div><button onClick={onGenerate} disabled={isLoading} className="w-full btn-primary disabled:opacity-50">{isLoading ? 'Gerando...' : 'Gerar Relatório'}</button></div></div>;
+}
