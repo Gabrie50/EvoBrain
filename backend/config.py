@@ -234,12 +234,12 @@ class Settings:
         self.frontend.theme = os.getenv("FRONTEND_THEME", self.frontend.theme)
 
     def _load_from_yaml(self):
-        yaml_path = Path("config/user_config.yml")
-        if not yaml_path.exists():
-            return
-        with yaml_path.open("r", encoding="utf-8") as handle:
-            data = yaml.safe_load(handle) or {}
-        self._merge_dict(data)
+        for yaml_path in (Path("config/default.yml"), Path("config/user_config.yml")):
+            if not yaml_path.exists():
+                continue
+            with yaml_path.open("r", encoding="utf-8") as handle:
+                data = yaml.safe_load(handle) or {}
+            self._merge_dict(data)
 
     def _merge_dict(self, data: Dict[str, Any]):
         for key, value in data.items():
