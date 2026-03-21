@@ -11,11 +11,6 @@ services:
     restart: unless-stopped
     networks:
       - evobrain_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   postgres:
     image: postgres:15-alpine
@@ -30,11 +25,6 @@ services:
     restart: unless-stopped
     networks:
       - evobrain_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U evobrain"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   backend:
     build:
@@ -43,19 +33,15 @@ services:
     environment:
       - DATABASE_URL=postgresql://evobrain:evobrain123@postgres:5432/evobrain
       - LLM_HOST=http://ollama:11434
-      - API_HOST=0.0.0.0
-      - API_PORT=8000
     ports:
       - "8000:8000"
     depends_on:
-      ollama:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+      - ollama
+      - postgres
     volumes:
       - ./backend:/app
-      - models_data:/app/storage/models
-      - checkpoints_data:/app/storage/checkpoints
+      - uploads_data:/app/uploads
+      - storage_data:/app/storage
     restart: unless-stopped
     networks:
       - evobrain_network
@@ -68,7 +54,6 @@ services:
       - "3000:3000"
     environment:
       - VITE_API_URL=http://localhost:8000
-      - VITE_WS_URL=ws://localhost:8000
     depends_on:
       - backend
     restart: unless-stopped
@@ -78,8 +63,8 @@ services:
 volumes:
   ollama_data:
   postgres_data:
-  models_data:
-  checkpoints_data:
+  uploads_data:
+  storage_data:
 
 networks:
   evobrain_network:

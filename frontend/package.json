@@ -21,7 +21,6 @@
     "tailwind-merge": "^2.0.0",
     "@heroicons/react": "^2.2.0",
     "react-dropzone": "^14.3.5"
-    "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

@@ -1,4 +1,7 @@
-"""EvoBrain - Sistema de Previsão 24/7 com 5 Etapas."""
+"""
+EvoBrain - Sistema de Previsão Genérico 24/7.
+Completo com extração, geração, simulação, relatório e interação.
+"""
 
 import threading
 import time
@@ -25,6 +28,8 @@ logger = setup_logger()
 
 
 class EvoBrain:
+    """Sistema principal genérico do EvoBrain."""
+
     def __init__(self):
         self.llm = None
         self.extractor = None
@@ -32,47 +37,108 @@ class EvoBrain:
         self.simulation = None
         self.reporter = None
         self.chat_engine = None
-        self.data_api = None
+        self.data_collector = None
         self.checkpoint_manager = None
         self._initialized = False
         self._simulation_thread = None
         self._start_time = None
 
     def initialize(self):
+        logger.info("=" * 60)
+        logger.info("🧠 EVOBRAIN - Inicializando Sistema Completo")
+        logger.info(f"   Domínio: {settings.domain.name}")
+        logger.info(f"   Ações: {[action['name'] for action in settings.get_domain_actions()]}")
+        logger.info(f"   LLM: {settings.llm.type} ({settings.llm.model})")
+        logger.info(f"   Data Source: {settings.data_source.type}")
+        logger.info("=" * 60)
+
         init_db()
-        self.llm = LocalLLM(model=settings.LLM_MODEL, host=settings.LLM_HOST, timeout=settings.LLM_TIMEOUT)
+        self.llm = LocalLLM(
+            model=settings.llm.model,
+            host=settings.llm.host,
+            timeout=settings.llm.timeout,
+        )
         self.llm.connect()
+
         self.extractor = GraphExtractor(self.llm)
-        self.generator = DynamicAgentGenerator(self.llm, max_agents=settings.MAX_AGENTS, creation_delay=settings.AGENT_CREATION_DELAY)
+        self.generator = DynamicAgentGenerator(
+            llm=self.llm,
+            max_agents=settings.agents.max_agents,
+            creation_delay=settings.agents.creation_delay,
+        )
         self.generator.start_generation_thread()
-        self.simulation = DynamicSimulationEngine(self.generator, state_size=settings.STATE_SIZE, history_size=settings.HISTORY_SIZE)
+        self.simulation = DynamicSimulationEngine(
+            self.generator,
+            state_size=settings.agents.state_size,
+            history_size=5000,
+        )
         self.reporter = ReportGenerator(self.llm)
         self.chat_engine = ChatEngine(self.generator, self.llm)
-        self.data_api = BacBoDataAPI()
+        self.data_collector = BacBoDataAPI()
         self.checkpoint_manager = CheckpointManager()
         self.checkpoint_manager.load(self)
         self._initialized = True
+        logger.info("✅ EvoBrain inicializado com sucesso!")
 
-    def start_simulation_24_7(self):
+    def start(self):
         if not self._initialized:
             raise RuntimeError("Sistema não inicializado")
-        self.simulation.run_continuously(self.data_api)
-
-    def start_background_simulation(self):
         if self._simulation_thread is None:
-            self._simulation_thread = threading.Thread(target=self.start_simulation_24_7, daemon=True)
+            self._simulation_thread = threading.Thread(
+                target=self.simulation.run_continuously,
+                args=(self.data_collector,),
+                daemon=True,
+            )
             self._simulation_thread.start()
+            logger.info("✅ Simulação 24/7 iniciada")
+        self._start_time = time.time()
 
     def process_pdf(self, pdf_content: bytes, filename: str) -> dict:
         knowledge_graph = self.extractor.extract_from_pdf(pdf_content, filename)
         for entity in knowledge_graph.get("entities", []):
-            self.generator.request_agent(entity_name=entity["name"], context=entity.get("description", ""), priority=entity.get("priority", 1))
-        return {"filename": filename, "entities_found": len(knowledge_graph.get("entities", [])), "relations_found": len(knowledge_graph.get("relations", [])), "agents_requested": len(knowledge_graph.get("entities", [])), "status": "processing"}
+            self.generator.request_agent(
+                entity_name=entity["name"],
+                context=entity.get("description", ""),
+                priority=entity.get("priority", 1),
+            )
+        return {
+            "filename": filename,
+            "entities_found": len(knowledge_graph.get("entities", [])),
+            "relations_found": len(knowledge_graph.get("relations", [])),
+            "agents_requested": len(knowledge_graph.get("entities", [])),
+            "status": "processing",
+        }
+
+    def process_text(self, text: str, source: str = "api") -> dict:
+        extracted = self.extractor.extract_from_text(text)
+        for entity in extracted.get("entities", []):
+            self.generator.request_agent(
+                entity_name=entity["name"],
+                context=entity.get("description", source),
+                priority=entity.get("priority", 1),
+            )
+        return {
+            "source": source,
+            "text_length": extracted.get("text_length", len(text)),
+            "entities_found": len(extracted.get("entities", [])),
+            "relations_found": len(extracted.get("relations", [])),
+            "agents_requested": len(extracted.get("entities", [])),
+            "status": "processing",
+        }
 
     def get_stats(self) -> dict:
         if not self._initialized:
             return {"status": "not_initialized"}
-        return {"status": "running", "simulation": self.simulation.get_stats() if self.simulation else {}, "generation": self.generator.get_stats() if self.generator else {}, "llm_connected": self.llm.is_connected() if self.llm else False, "uptime": time.time() - self._start_time if self._start_time else 0}
+        return {
+            "status": "running",
+            "domain": settings.domain.name,
+            "actions": settings.get_domain_actions(),
+            "simulation": self.simulation.get_stats() if self.simulation else {},
+            "generation": self.generator.get_stats() if self.generator else {},
+            "llm_connected": self.llm.is_connected() if self.llm else False,
+            "data_source": settings.data_source.type,
+            "uptime": time.time() - self._start_time if self._start_time else 0,
+        }
 
     def get_prediction(self) -> dict:
         return self.simulation.get_current_prediction() if self.simulation else {}
@@ -86,13 +152,19 @@ class EvoBrain:
     def generate_report(self) -> str:
         return self.reporter.generate_report(self.get_stats()) if self.reporter else "Relatório não disponível"
 
+    def save_checkpoint(self):
+        if self.checkpoint_manager:
+            self.checkpoint_manager.save(self)
+
     def stop(self):
+        logger.info("\n🛑 Parando EvoBrain...")
         if self.generator:
             self.generator.stop()
         if self.simulation:
             self.simulation.stop()
         if self.checkpoint_manager:
             self.checkpoint_manager.save(self)
+        logger.info("✅ Sistema parado")
 
 
 evobrain = EvoBrain()
@@ -101,13 +173,24 @@ evobrain = EvoBrain()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     evobrain.initialize()
-    evobrain._start_time = time.time()
+    evobrain.start()
     yield
     evobrain.stop()
 
 
-app = FastAPI(title="EvoBrain API", description="Sistema de Previsão 24/7 com RL + Neuroevolution", version="1.0.0", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=[settings.FRONTEND_URL, "http://localhost:3000"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app = FastAPI(
+    title="EvoBrain API",
+    description="Sistema de Previsão Genérico 24/7 com RL + Neuroevolution",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.api.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(health.router, prefix="/api", tags=["Health"])
 app.include_router(stats.router, prefix="/api", tags=["Stats"])
 app.include_router(predict.router, prefix="/api", tags=["Predict"])
@@ -120,9 +203,34 @@ app.include_router(websocket_router, prefix="/api", tags=["WebSocket"])
 
 @app.get("/")
 async def root():
-    return {"name": "EvoBrain", "version": "1.0.0", "stages": [{"name": "Extração", "status": "active", "llm": "local"}, {"name": "Geração", "status": "active", "dynamic": True}, {"name": "Simulação", "status": "active", "engine": "RL + Neuroevolution"}, {"name": "Relatório", "status": "active", "llm": "local"}, {"name": "Interação", "status": "active", "llm": "local"}]}
+    return {
+        "name": "EvoBrain",
+        "version": "1.0.0",
+        "domain": settings.domain.name,
+        "actions": settings.get_domain_actions(),
+        "stages": [
+            {"name": "Extração", "status": "active"},
+            {"name": "Geração", "status": "active", "dynamic": True},
+            {"name": "Simulação", "status": "active", "engine": "RL + Neuroevolution"},
+            {"name": "Relatório", "status": "active"},
+            {"name": "Interação", "status": "active"},
+        ],
+        "features": [
+            "Configuração genérica por domínio",
+            "LLM local configurável",
+            "Aprendizado contínuo 24/7",
+            "Geração dinâmica de agentes",
+        ],
+    }
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host=settings.API_HOST, port=settings.API_PORT, workers=settings.API_WORKERS, reload=True)
+
+    uvicorn.run(
+        "main:app",
+        host=settings.api.host,
+        port=settings.api.port,
+        workers=settings.api.workers,
+        reload=True,
+    )

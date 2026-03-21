@@ -42,18 +42,19 @@ logs/
 
 # Uploads
 uploads/
+uploads/processed/
 *.pdf
 
 # Checkpoints
-checkpoints/
-models/
+storage/checkpoints/
+storage/knowledge/
+storage/models/
 
 # Frontend
-node_modules/
-dist/
-build/
-.env.development
-.env.production
+frontend/node_modules/
+frontend/dist/
+frontend/build/
 
 # Docker
 *.pid
+docker-compose.yml
