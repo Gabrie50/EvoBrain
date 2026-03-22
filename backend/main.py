@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import agents, chat, health, predict, report, stats, upload
+from api.routes import agents, chat, config as config_routes, health, predict, report, stats, upload
 from api.websocket import router as websocket_router
 from config import settings
 from data_collector.bacbo_api import BacBoDataAPI
@@ -198,6 +198,7 @@ app.include_router(agents.router, prefix="/api", tags=["Agents"])
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(report.router, prefix="/api", tags=["Report"])
 app.include_router(upload.router, prefix="/api", tags=["Upload"])
+app.include_router(config_routes.router, prefix="/api", tags=["Config"])
 app.include_router(websocket_router, prefix="/api", tags=["WebSocket"])
 
 

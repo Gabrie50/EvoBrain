@@ -1,0 +1,52 @@
+# Configuração do usuário
+# Este arquivo é criado automaticamente via UI
+# Edite manualmente ou use a interface web
+
+# Exemplo para Mercado Financeiro:
+# domain:
+#   type: "stock_market"
+#   name: "Mercado Financeiro"
+#   description: "Previsão de movimentação de ações"
+#   actions:
+#     - id: 0
+#       name: "BUY"
+#       color: "🟢"
+#       emoji: "🟢"
+#     - id: 1
+#       name: "SELL"
+#       color: "🔴"
+#       emoji: "🔴"
+
+# Exemplo para Esportes:
+# domain:
+#   type: "sports"
+#   name: "Esportes"
+#   description: "Previsão de resultados esportivos"
+#   actions:
+#     - id: 0
+#       name: "HOME"
+#       color: "🏠"
+#       emoji: "🏠"
+#     - id: 1
+#       name: "AWAY"
+#       color: "✈️"
+#       emoji: "✈️"
+#     - id: 2
+#       name: "DRAW"
+#       color: "⚪"
+#       emoji: "⚪"
+
+# Exemplo para Política:
+# domain:
+#   type: "politics"
+#   name: "Política"
+#   description: "Previsão de resultados políticos"
+#   actions:
+#     - id: 0
+#       name: "CANDIDATO_A"
+#       color: "🔵"
+#       emoji: "🔵"
+#     - id: 1
+#       name: "CANDIDATO_B"
+#       color: "🔴"
+#       emoji: "🔴"
