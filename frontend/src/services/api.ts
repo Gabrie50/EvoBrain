@@ -135,6 +135,32 @@ export const apiService = {
     return response.data;
   },
   
+
+  // Config
+  getConfig: async () => {
+    const response = await api.get('/config');
+    return response.data;
+  },
+
+  saveConfig: async (config: any) => {
+    const response = await api.post('/config/save', config);
+    return response.data;
+  },
+
+  listDomains: async () => {
+    const response = await api.get('/config/domains');
+    return response.data;
+  },
+
+  listLLMTypes: async () => {
+    const response = await api.get('/config/llm_types');
+    return response.data;
+  },
+
+  listDataSourceTypes: async () => {
+    const response = await api.get('/config/data_source_types');
+    return response.data;
+  },
   // Health
   health: async () => {
     const response = await api.get('/health');
