@@ -1,0 +1,103 @@
+# Configurações padrão do EvoBrain
+# O usuário pode sobrescrever via user_config.yml ou UI
+
+version: "1.0"
+
+domain:
+  type: "bacbo"
+  name: "Bac Bo"
+  description: "Jogo de dados Bac Bo"
+  actions:
+    - id: 0
+      name: "BANKER"
+      color: "🔴"
+      emoji: "🔴"
+    - id: 1
+      name: "PLAYER"
+      color: "🔵"
+      emoji: "🔵"
+    - id: 2
+      name: "TIE"
+      color: "🟡"
+      emoji: "🟡"
+
+llm:
+  type: "ollama"
+  model: "llama3.2"
+  host: "http://localhost:11434"
+  api_key: ""
+  temperature: 0.7
+  max_tokens: 1000
+  timeout: 30
+
+data_source:
+  type: "bacbo"
+  enabled: true
+  interval: 0.5
+  rest_url: ""
+  rest_method: "GET"
+  rest_headers: {}
+  rest_params: {}
+  rest_mapping: {}
+  ws_url: ""
+  ws_headers: {}
+  bacbo_api_url: "https://api-cs.casino.org/svc-evolution-game-events/api/bacbo"
+  bacbo_ws_url: "wss://api-cs.casino.org/svc-evolution-game-events/ws/bacbo"
+
+agents:
+  max_agents: 10000
+  state_size: 150
+  creation_delay: 0.5
+  initial_agents: 100
+
+rl:
+  learning_rate: 0.001
+  gamma: 0.99
+  epsilon_start: 0.3
+  epsilon_min: 0.05
+  epsilon_decay: 0.9995
+  batch_size: 64
+  memory_size: 10000
+
+replay:
+  capacity: 100000
+  alpha: 0.6
+  beta: 0.4
+
+neuroevolution:
+  mutation_rate: 0.1
+  elite_percent: 0.2
+  crossover_rate: 0.7
+  population_size: 1000
+
+memory:
+  episodic_size: 100
+  long_term_size: 10000
+  decay_rate: 0.01
+  consolidation_threshold: 0.7
+
+competition:
+  elo_k: 32
+  keep_ratio: 0.3
+  tournament_rounds: 3
+
+continuous_learning:
+  enabled: true
+  upload_dir: "uploads"
+  interval: 5
+
+database:
+  enabled: false
+  url: ""
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  cors_origins:
+    - "http://localhost:3000"
+
+frontend:
+  url: "http://localhost:3000"
+  title: "EvoBrain"
+  theme: "dark"
