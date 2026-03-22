@@ -34,8 +34,9 @@ class DynamicSimulationEngine:
         while self._running:
             try:
                 new_data = data_api.fetch_latest()
-                if new_data:
-                    self.history.append(new_data)
+                normalized = self._normalize_data(new_data)
+                if normalized:
+                    self.history.append(normalized)
                     self._sync_agents()
                     if len(self.history) >= 30:
                         self._predict()
@@ -45,6 +46,23 @@ class DynamicSimulationEngine:
             except Exception as exc:
                 logger.error(f"Erro na simulação: {exc}")
                 time.sleep(1)
+
+    def _normalize_data(self, new_data):
+        if new_data is None:
+            return None
+        if isinstance(new_data, dict):
+            return new_data
+        if hasattr(new_data, "id") and hasattr(new_data, "action"):
+            metadata = getattr(new_data, "metadata", {}) or {}
+            return {
+                "id": new_data.id,
+                "timestamp": getattr(new_data, "timestamp", time.time()),
+                "player_score": metadata.get("player_score", 0),
+                "banker_score": metadata.get("banker_score", 0),
+                "resultado": new_data.action,
+                "raw_data": getattr(new_data, "raw_data", {}),
+            }
+        return None
 
     def _sync_agents(self):
         for name in list(self.generator.agents.keys()):
@@ -83,6 +101,13 @@ class DynamicSimulationEngine:
             action = 0 if pred["prediction"] == "BANKER" else 1
             agent.learn(action, real_result, next_state)
         self.feedback_loop.process(pred, real_result, acertou)
+
+    def add_agent_to_simulation(self, agent_name: str):
+        if agent_name in self.rl_agents:
+            return
+        profile = self.generator.get_agent(agent_name)
+        if profile:
+            self.rl_agents[agent_name] = RLAgent(profile, self.state_size)
 
     def stop(self):
         self._running = False

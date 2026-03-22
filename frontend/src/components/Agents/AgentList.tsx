@@ -1,4 +1,3 @@
-import React from 'react';
 import { Agent } from '../../services/api';
 import AgentCard from './AgentCard';
 

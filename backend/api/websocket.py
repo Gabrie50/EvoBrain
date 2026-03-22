@@ -1,4 +1,6 @@
-"""WebSocket para comunicação em tempo real com o frontend."""
+"""
+WebSocket para comunicação em tempo real
+"""
 
 import json
 import time
@@ -6,9 +8,6 @@ from typing import Set
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from utils.logger import get_logger
-
-logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -23,25 +22,18 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.discard(websocket)
 
-    async def send_personal_message(self, message: dict, websocket: WebSocket):
-        await websocket.send_json(message)
-
     async def broadcast(self, message: dict):
-        stale = []
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
-            except Exception as exc:
-                logger.error(f"Erro ao enviar mensagem: {exc}")
-                stale.append(connection)
-        for connection in stale:
-            self.disconnect(connection)
+            except Exception:
+                pass
 
 
 manager = ConnectionManager()
 
 
-@router.websocket('/ws')
+@router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
@@ -49,13 +41,10 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
             try:
                 msg = json.loads(data)
-            except json.JSONDecodeError:
-                await manager.send_personal_message({"type": "error", "message": "Invalid JSON"}, websocket)
-                continue
-            if msg.get('type') == 'ping':
-                await manager.send_personal_message({"type": "pong", "timestamp": time.time()}, websocket)
-            elif msg.get('type') == 'subscribe':
-                await manager.send_personal_message({"type": "subscribed", "topic": msg.get('topic')}, websocket)
+                if msg.get("type") == "ping":
+                    await manager.broadcast({"type": "pong", "timestamp": time.time()})
+            except Exception:
+                pass
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 

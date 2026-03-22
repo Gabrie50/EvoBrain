@@ -1,4 +1,3 @@
-import React from 'react';
 import { Prediction } from '../../services/api';
 
 interface PredictionCardProps {
@@ -7,9 +6,10 @@ interface PredictionCardProps {
 
 export default function PredictionCard({ prediction }: PredictionCardProps) {
   const isBanker = prediction.prediction === 'BANKER';
-  const totalVotes = prediction.votes.BANKER + prediction.votes.PLAYER;
-  const bankerPercentage = totalVotes > 0 ? (prediction.votes.BANKER / totalVotes) * 100 : 50;
-  const playerPercentage = totalVotes > 0 ? (prediction.votes.PLAYER / totalVotes) * 100 : 50;
+  const votes = prediction.votes || { BANKER: 0, PLAYER: 0 };
+  const totalVotes = votes.BANKER + votes.PLAYER;
+  const bankerPercentage = totalVotes > 0 ? (votes.BANKER / totalVotes) * 100 : 50;
+  const playerPercentage = totalVotes > 0 ? (votes.PLAYER / totalVotes) * 100 : 50;
 
   return (
     <div className="card">
@@ -27,7 +27,6 @@ export default function PredictionCard({ prediction }: PredictionCardProps) {
         </div>
       </div>
 
-      {/* Barra de votos */}
       <div className="mt-6">
         <div className="flex h-10 rounded-lg overflow-hidden shadow-sm">
           <div

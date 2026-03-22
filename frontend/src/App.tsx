@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -10,6 +9,7 @@ import Agents from './pages/Agents';
 import Reports from './pages/Reports';
 import Upload from './pages/Upload';
 import Settings from './pages/Settings';
+import SetupWizard from './pages/SetupWizard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +34,7 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/upload" element={<Upload />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/setup" element={<SetupWizard />} />
           </Routes>
         </Layout>
       </BrowserRouter>

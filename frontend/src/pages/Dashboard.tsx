@@ -1,12 +1,11 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { apiService } from '../services/api';
-import StatsCards from '../components/Dashboard/StatsCards';
+import Loading from '../components/Common/Loading';
 import AccuracyChart from '../components/Dashboard/AccuracyChart';
 import AgentsStatus from '../components/Dashboard/AgentsStatus';
-import RecentPredictions from '../components/Dashboard/RecentPredictions';
 import PredictionCard from '../components/Dashboard/PredictionCard';
-import Loading from '../components/Common/Loading';
+import RecentPredictions from '../components/Dashboard/RecentPredictions';
+import StatsCards from '../components/Dashboard/StatsCards';
+import { apiService } from '../services/api';
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
@@ -15,7 +14,7 @@ export default function Dashboard() {
     refetchInterval: 5000,
   });
 
-  const { data: prediction, isLoading: predLoading } = useQuery({
+  const { data: prediction } = useQuery({
     queryKey: ['prediction'],
     queryFn: apiService.getCurrentPrediction,
     refetchInterval: 2000,
@@ -25,13 +24,15 @@ export default function Dashboard() {
     return <Loading />;
   }
 
-  if (statsError) {
+  if (statsError || !stats) {
     return (
       <div className="text-center py-10 text-red-500">
         Erro ao carregar estatísticas. Verifique se o backend está rodando.
       </div>
     );
   }
+
+  const hasPrediction = prediction && prediction.prediction;
 
   return (
     <div className="space-y-6">
@@ -44,23 +45,15 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Previsão Atual */}
-      {prediction && prediction.status !== 'no_prediction' && (
-        <PredictionCard prediction={prediction} />
-      )}
+      {hasPrediction && <PredictionCard prediction={prediction} />}
 
-      {/* Cards de Estatísticas */}
       <StatsCards stats={stats} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Gráfico de Precisão */}
         <AccuracyChart stats={stats} />
-
-        {/* Status dos Agentes */}
         <AgentsStatus stats={stats} />
       </div>
 
-      {/* Últimas Previsões */}
       <RecentPredictions predictions={stats?.simulation?.recent_predictions || []} />
     </div>
   );

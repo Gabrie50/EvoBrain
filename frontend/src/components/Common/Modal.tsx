@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-interface ModalProps { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; size?: 'sm' | 'md' | 'lg' | 'xl'; }
+interface ModalProps { isOpen: boolean; onClose: () => void; title: string; children: ReactNode; size?: 'sm' | 'md' | 'lg' | 'xl'; }
 
 export default function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
   useEffect(() => {

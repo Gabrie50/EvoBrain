@@ -1,4 +1,3 @@
-import React from 'react';
 
 interface AgentVotesProps { votes?: { BANKER: number; PLAYER: number; }; onSelectAgent?: (agentName: string) => void; selectedAgent?: string | null; }
 
