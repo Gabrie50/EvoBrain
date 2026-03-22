@@ -1,4 +1,3 @@
-import React from 'react';
 import { Stats } from '../../services/api';
 import Loading from '../Common/Loading';
 

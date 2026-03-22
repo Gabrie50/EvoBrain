@@ -1,4 +1,3 @@
-import React from 'react';
 import { Prediction, Stats } from '../../services/api';
 
 interface SimulationViewProps { prediction?: Prediction & { status?: string }; stats?: Stats; }

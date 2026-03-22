@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../../services/api';
 
@@ -19,7 +19,7 @@ export default function DomainStep({ config, onNext, onBack }: DomainStepProps) 
   const handleRemoveAction = (id: number) => setCustomActions(customActions.filter((a: any) => a.id !== id));
   const handleActionChange = (id: number, field: string, value: string) => setCustomActions(customActions.map((a: any) => a.id === id ? { ...a, [field]: value, emoji: field === 'color' ? value : a.emoji } : a));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const domainConfig = domainType === 'custom'
       ? { type: 'custom', name: 'Customizado', description: 'Domínio customizado', actions: customActions }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../../services/api';
 
@@ -17,7 +17,7 @@ export default function LLMStep({ config, onNext, onBack }: LLMStepProps) {
 
   const { data: llmTypes } = useQuery({ queryKey: ['llm_types'], queryFn: apiService.listLLMTypes });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const llmConfig: any = { type: llmType, model, temperature };
     if (llmType === 'ollama') llmConfig.host = host;

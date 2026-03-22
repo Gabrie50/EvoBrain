@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../services/api';
 import SimulationView from '../components/Simulation/SimulationView';

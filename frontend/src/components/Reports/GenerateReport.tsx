@@ -1,4 +1,3 @@
-import React from 'react';
 import { Stats } from '../../services/api';
 
 interface GenerateReportProps { stats?: Stats; reportType: 'full' | 'summary' | 'detailed'; onReportTypeChange: (type: 'full' | 'summary' | 'detailed') => void; onGenerate: () => void; isLoading: boolean; }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -49,7 +49,7 @@ export default function SetupWizard() {
     saveMutation.mutate(nextConfig);
   };
 
-  const CurrentComponent = steps[currentStep].component as React.ComponentType<any>;
+  const CurrentComponent = steps[currentStep].component as ComponentType<any>;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../../services/api';
 
@@ -16,7 +16,7 @@ export default function DataSourceStep({ config, onNext, onBack }: DataSourceSte
 
   const { data: sourceTypes } = useQuery({ queryKey: ['data_source_types'], queryFn: apiService.listDataSourceTypes });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const dsConfig: any = { type: sourceType, enabled: true, interval };
     if (sourceType === 'rest_api') dsConfig.rest_url = apiUrl;

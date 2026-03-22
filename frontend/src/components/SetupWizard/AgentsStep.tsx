@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 
 interface AgentsStepProps {
   config: any;
@@ -12,7 +12,7 @@ export default function AgentsStep({ config, onNext, onBack }: AgentsStepProps) 
   const [mutationRate, setMutationRate] = useState(config?.neuroevolution?.mutation_rate || 0.1);
   const [keepRatio, setKeepRatio] = useState(config?.competition?.keep_ratio || 0.3);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onNext({ agents: { max_agents: maxAgents, state_size: stateSize }, neuroevolution: { mutation_rate: mutationRate }, competition: { keep_ratio: keepRatio } });
   };

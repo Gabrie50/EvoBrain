@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { PaperAirplaneIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Agent, apiService } from '../../services/api';

@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Usa a URL do backend (pode ser configurada via variável de ambiente)
+const API_BASE = (typeof window !== 'undefined' && (window as any).ENV?.VITE_API_URL) || 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE,
   timeout: 30000,
 });
 
-// Tipos
 export interface Stats {
   status: string;
   simulation: {
@@ -39,12 +39,13 @@ export interface Stats {
 export interface Prediction {
   prediction: string;
   confidence: number;
-  votes: {
+  votes?: {
     BANKER: number;
     PLAYER: number;
   };
   agents_active: number;
   timestamp: number;
+  status?: string;
 }
 
 export interface Agent {
@@ -57,48 +58,46 @@ export interface Agent {
   total_uso: number;
   fitness: number;
   specializations: string[];
+  acertos?: number;
+  erros?: number;
 }
 
 export const apiService = {
-  // Stats
   getStats: async (): Promise<Stats> => {
     const response = await api.get('/stats');
     return response.data;
   },
-  
+
   getStatsSummary: async () => {
     const response = await api.get('/stats/summary');
     return response.data;
   },
-  
-  // Predictions
+
   getCurrentPrediction: async (): Promise<Prediction> => {
     const response = await api.get('/predict/current');
     return response.data;
   },
-  
+
   getPredictionHistory: async (limit: number = 100) => {
     const response = await api.get(`/predict/history?limit=${limit}`);
     return response.data;
   },
-  
-  // Agents
+
   listAgents: async (): Promise<Agent[]> => {
     const response = await api.get('/agents');
     return response.data;
   },
-  
+
   getAgent: async (name: string): Promise<Agent> => {
     const response = await api.get(`/agents/${encodeURIComponent(name)}`);
     return response.data;
   },
-  
+
   getAgentStats: async (name: string) => {
     const response = await api.get(`/agents/${encodeURIComponent(name)}/stats`);
     return response.data;
   },
-  
-  // Chat
+
   chatWithAgent: async (agentName: string, question: string) => {
     const response = await api.post('/chat/agent', {
       agent_name: agentName,
@@ -106,44 +105,38 @@ export const apiService = {
     });
     return response.data;
   },
-  
+
   listChatAgents: async () => {
     const response = await api.get('/chat/agents');
     return response.data;
   },
-  
-  // Reports
+
   generateReport: async (type: 'full' | 'summary' | 'detailed' = 'full') => {
     const response = await api.get(`/report/generate?type=${type}`);
     return response.data;
   },
-  
+
   getReportSummary: async () => {
     const response = await api.get('/report/summary');
     return response.data;
   },
-  
-  // Upload
+
   uploadPDF: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
     const response = await api.post('/upload/pdf', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
-  
 
-  // Config
-  getConfig: async () => {
-    const response = await api.get('/config');
+  health: async () => {
+    const response = await api.get('/health');
     return response.data;
   },
 
-  saveConfig: async (config: any) => {
-    const response = await api.post('/config/save', config);
+  detailedHealth: async () => {
+    const response = await api.get('/health/detailed');
     return response.data;
   },
 
@@ -161,14 +154,14 @@ export const apiService = {
     const response = await api.get('/config/data_source_types');
     return response.data;
   },
-  // Health
-  health: async () => {
-    const response = await api.get('/health');
+
+  getConfig: async () => {
+    const response = await api.get('/config');
     return response.data;
   },
-  
-  detailedHealth: async () => {
-    const response = await api.get('/health/detailed');
+
+  saveConfig: async (config: any) => {
+    const response = await api.post('/config', config);
     return response.data;
   },
 };
